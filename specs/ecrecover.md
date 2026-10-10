@@ -2,7 +2,7 @@
 title: Precompile for ECRECOVER Support on Terra
 description: Add precompiled custom query for secp256k1 ECDSA public key recovery via x/crypto module
 author: Libertalia (@libertalia1724)
-discussions-to: N/A
+discussions-to: https://github.com/Terra-Collective/precompile-spec/discussions/1
 status: Draft
 type: Standards Track
 category: Core
