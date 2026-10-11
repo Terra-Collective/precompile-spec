@@ -112,9 +112,12 @@ No other value is checked. Any 32 byte hash is accepted, and there is no public 
 
 ### Signature Recovery Algorithm
 
-ECRECOVER derives the signer's public key as `Q = r^(-1) * (s*R - z*G)` and returns the address of `Q`. EMPTY is the zero length output.
+ECRECOVER derives the signer's public key as `Q = r^(-1) * (s*R - z*G)` and returns the address of `Q`. EMPTY is the 32 bytes zero output.
 
 ```text
+# Empty Constant
+EMPTY = b"0x0000000000000000000000000000000000000000000000000000000000000000"
+
 # Input normalization
 input = right_pad(input, 128)            # longer input is kept as is, only bytes 0..127 are read
 h = input[0:32]
