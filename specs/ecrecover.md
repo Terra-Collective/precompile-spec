@@ -32,12 +32,12 @@ It SHALL be implemented by adding a gRPC query router to the `x/crypto` module. 
 | Path | `/terra.crypto.v1beta1.Query/Ecrecover` |
 | Curve | secp256k1 |
 | Input | `hash ‖ v ‖ r ‖ s`, 4 × 32 bytes, 128 bytes expected, any length accepted |
-| Output | 32 bytes (12 zero bytes ‖ address) on success, 0 bytes on failure |
+| Output | 32 bytes (12 zero bytes ‖ address) on success, 32 byte zeros on failure |
 | Gas | 78000, fixed |
 
 ### Curve Parameters
 
-ECRECOVER by the following set of parameters:
+ECRECOVER operates on secp256k1, fully defined by the following parameters:
 
 ``` text
 Base field modulus = p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
@@ -79,7 +79,7 @@ Every input is a 32 byte big-endian word and the precompile never takes or retur
 
 ### Behavior on Invalid Inputs
 
-On any input that cannot yield a signer, the precompile returns 32 bytes zero and the call still succeeds. Implementation SHALL be returns 32 byte zeros on every failure path, so nothing reverts and the caller sees zero bytes of return data.
+On any input that cannot yield a signer, the precompile returns 32 bytes zero and the call still succeeds. Implementation SHALL be returns 32 byte zeros on every failure path, so nothing reverts and the caller sees 32 byte zeros of return data.
 
 Input length is not an invalid input condition. Input shorter than 128 bytes is right padded with zeros, and bytes beyond offset 127 of a longer input are never read.
 
@@ -98,7 +98,7 @@ Any input length is accepted. Input shorter than 128 bytes is right-padded with 
 
 ### Output
 
-Output is 32 bytes on successful recovery and 32 bytes zero on failure, `0x000000000000000000000000` followed by the 20-byte signer address for a recoverable signature and empty for anything else.
+Output is always 32 bytes, the address word on success, EMPTY on failure.
 
 ### Input Validation
 
