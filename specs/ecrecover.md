@@ -37,7 +37,7 @@ It SHALL be implemented by adding a gRPC query router to the `x/crypto` module. 
 
 ### Curve Parameters
 
-ECRECOVER works on which is fully defined by the following set of parameters:
+ECRECOVER by the following set of parameters:
 
 ``` text
 Base field modulus = p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
@@ -79,7 +79,7 @@ Every input is a 32 byte big-endian word and the precompile never takes or retur
 
 ### Behavior on Invalid Inputs
 
-On any input that cannot yield a signer, the precompile returns 32 bytes zero and the call still succeeds. Implementation SHALL be returns `nil, nil` on every failure path, so nothing reverts and the caller sees zero bytes of return data.
+On any input that cannot yield a signer, the precompile returns 32 bytes zero and the call still succeeds. Implementation SHALL be returns 32 byte zeros on every failure path, so nothing reverts and the caller sees zero bytes of return data.
 
 Input length is not an invalid input condition. Input shorter than 128 bytes is right padded with zeros, and bytes beyond offset 127 of a longer input are never read.
 
@@ -102,7 +102,7 @@ Output is 32 bytes on successful recovery and 32 bytes zero on failure, `0x00000
 
 ### Input Validation
 
-The precompile MUST run the following three checks before any curve arithmetic and return empty output if any check fails (index is assumed to be zero based):
+The precompile MUST run the following three checks before any curve arithmetic and return EMPTY output if any check fails (index is assumed to be zero based):
 
 1. `v` word: bytes 32 to 62 MUST all be zero.
 2. `v` value: `input[63] - 27`, computed in mod 256, MUST be 0 or 1. Equivalently, `input[63]` is 27 or 28.
@@ -112,7 +112,7 @@ No other value is checked. Any 32 byte hash is accepted, and there is no public 
 
 ### Signature Recovery Algorithm
 
-ECRECOVER derives the signer's public key as `Q = r^(-1) * (s*R - z*G)` and returns the address of `Q`. EMPTY is the 32 bytes zero output.
+ECRECOVER derives the signer's public key as `Q = r^(-1) * (s*R - z*G)` and returns the address of `Q`. EMPTY is the 32 bytes zero output. `keccak256` is not equal NIST SHA3-256.
 
 ```text
 # Empty Constant
@@ -156,7 +156,7 @@ return 0x000000000000000000000000 || addr # 32 bytes
 
 ### Error Cases
 
-Six conditions return empty output, and none of them reverts or changes the gas charged (index is assumed to be zero based):
+Six conditions return EMPTY output, and none of them reverts or changes the gas charged (index is assumed to be zero based):
 
 1. The upper bytes of the `v` word are not zero.
 2. `input[63]` is neither 27 nor 28.
@@ -167,17 +167,17 @@ Six conditions return empty output, and none of them reverts or changes the gas 
 
 ### Gas Burning on Error
 
-The precompile MUST NOT revert on invalid input. Implementation always returns a `nil` error, every failure returns empty output, and the same 78000 gas is consumed as for a successful recovery. The one failure a caller can see is running out of gas when less than 78000 is supplied, implementation settles that before operation.
+The precompile MUST NOT revert on invalid input. Implementation always returns a `nil` error, every failure returns EMPTY output, and the same 78000 gas is consumed as for a successful recovery. The one failure a caller can see is running out of gas when less than 78000 is supplied, implementation settles that before operation.
 
 ## Security Considerations
 
-ECRECOVER roughly half of all values of `r` it returns an address even when the signature is garbage, so the caller must compare that address with the signer it expects.
+For roughly half of all values of `r` it returns an address even when the signature is garbage, so the caller must compare that address with the signer it expects.
 
 Caller MUST reject the zeros.
 
 Signatures are malleable. For a valid `(r, s, v)`, the triple `(r, n - s, 55 - v)` recovers the same address, and the precompile accepts both.
 
-`v` must be 27 or 28. A library that emits 0 or 1, or an `EIP-155` style value, gets empty output until it is normalised.
+`v` must be 27 or 28. A library that emits 0 or 1, or an `EIP-155` style value, gets EMPTY output until it is normalised.
 
 Length is not enforced. A truncated input is padded on the right and still recovers an unrelated address.
 
