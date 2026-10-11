@@ -79,7 +79,7 @@ Every input is a 32 byte big-endian word and the precompile never takes or retur
 
 ### Behavior on Invalid Inputs
 
-On any input that cannot yield a signer, the precompile returns 0 bytes and the call still succeeds. Implementation SHALL be returns `nil, nil` on every failure path, so nothing reverts and the caller sees zero bytes of return data.
+On any input that cannot yield a signer, the precompile returns 32 bytes zero and the call still succeeds. Implementation SHALL be returns `nil, nil` on every failure path, so nothing reverts and the caller sees zero bytes of return data.
 
 Input length is not an invalid input condition. Input shorter than 128 bytes is right padded with zeros, and bytes beyond offset 127 of a longer input are never read.
 
@@ -98,7 +98,7 @@ Any input length is accepted. Input shorter than 128 bytes is right-padded with 
 
 ### Output
 
-Output is 32 bytes on successful recovery and 0 bytes on failure, `0x000000000000000000000000` followed by the 20-byte signer address for a recoverable signature and empty for anything else.
+Output is 32 bytes on successful recovery and 32 bytes zero on failure, `0x000000000000000000000000` followed by the 20-byte signer address for a recoverable signature and empty for anything else.
 
 ### Input Validation
 
@@ -116,7 +116,7 @@ ECRECOVER derives the signer's public key as `Q = r^(-1) * (s*R - z*G)` and retu
 
 ```text
 # Empty Constant
-EMPTY = b"0x0000000000000000000000000000000000000000000000000000000000000000"
+EMPTY = b"\x00" * 32
 
 # Input normalization
 input = right_pad(input, 128)            # longer input is kept as is, only bytes 0..127 are read
@@ -173,7 +173,7 @@ The precompile MUST NOT revert on invalid input. Implementation always returns a
 
 ECRECOVER roughly half of all values of `r` it returns an address even when the signature is garbage, so the caller must compare that address with the signer it expects.
 
-Caller MUST reject the zero bytes.
+Caller MUST reject the zeros.
 
 Signatures are malleable. For a valid `(r, s, v)`, the triple `(r, n - s, 55 - v)` recovers the same address, and the precompile accepts both.
 
